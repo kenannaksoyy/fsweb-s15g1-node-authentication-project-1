@@ -1,6 +1,7 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
+const { bul } = require("./users/users-model");
 
 /**
   Kullanıcı oturumlarını desteklemek için `express-session` paketini kullanın!
@@ -21,8 +22,26 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 
-server.get("/", (req, res) => {
-  res.json({ api: "up" });
+const authRouter = require("./auth/auth-router");
+server.use('/api/auth', authRouter);
+const session = require('express-session');
+
+server.use(
+  session({
+    name: 'cikolatacips',
+    secret: 'TopSecret',
+    cookie: {
+      maxAge: 1 * 24 * 60 * 60 * 1000,
+      secure: true, 
+    },
+    httpOnly: true,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+server.get("/", async(req, res) => {
+  const users = await bul();
+  res.status(200).json(users);
 });
 
 server.use((err, req, res, next) => { // eslint-disable-line

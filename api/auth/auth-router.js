@@ -61,3 +61,36 @@
 
  
 // Diğer modüllerde kullanılabilmesi için routerı "exports" nesnesine eklemeyi unutmayın.
+const db = require("../../data/db-config");
+const express = require("express");
+const { usernameBostami, sifreGecerlimi, usernameVarmi, sifreLoginCheck } = require("./auth-middleware");
+const { ekle } = require("../users/users-model");
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+
+router.post("/register",usernameBostami,sifreGecerlimi, async(req, res, next)=>{
+  try{
+    const hashPassword = bcrypt.hashSync(req.body.password, 10);
+    const cObj = {
+      username: req.body.username,
+      password: hashPassword
+    }
+    const createdUser = await ekle(cObj);
+    res.status(200).json(createdUser);
+  }
+  catch(err){
+    next(err);
+  }
+});
+router.post("/login",usernameVarmi,sifreLoginCheck, async(req, res, next)=>{
+  try{
+    res.status(200).json({
+      message: `Hoşgeldin ${req.user.username}!`
+    })
+  }
+  catch(err){
+    next(err);
+  }
+});
+
+module.exports = router;

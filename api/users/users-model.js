@@ -1,8 +1,16 @@
 /**
   tüm kullanıcıları içeren bir DİZİ ye çözümlenir, tüm kullanıcılar { user_id, username } içerir
  */
-function bul() {
-
+const db = require("../../data/db-config");
+async function bul() {
+  const dbUsers = await db("users");
+  const resUsers = await dbUsers.map(u => {
+    return ({
+      user_id:u.user_id,
+      username:u.username
+    });
+  });
+  return resUsers;
 }
 
 /**
@@ -15,15 +23,25 @@ function goreBul(filtre) {
 /**
   verilen user_id li kullanıcıya çözümlenir, kullanıcı { user_id, username } içerir
  */
-function idyeGoreBul(user_id) {
-
+async function idyeGoreBul(user_id) {
+  return await db('users')
+  .where({ user_id: Number(user_id) })
+  .first();
 }
-
+async function usernameGoreBul(cUsername){
+  return await db('users').
+  where({username: cUsername}).
+  first();
+}
 /**
   yeni eklenen kullanıcıya çözümlenir { user_id, username }
  */
 function ekle(user) {
-
+  return db('users')
+    .insert(user)
+    .then(c_id => (idyeGoreBul(c_id)))
+    .then(u => ({user_id: u.user_id,username: u.username}));
 }
 
 // Diğer modüllerde kullanılabilmesi için fonksiyonları "exports" nesnesine eklemeyi unutmayın.
+module.exports={bul,ekle,idyeGoreBul,usernameGoreBul}
