@@ -82,8 +82,10 @@ router.post("/register",usernameBostami,sifreGecerlimi, async(req, res, next)=>{
     next(err);
   }
 });
+
 router.post("/login",usernameVarmi,sifreLoginCheck, async(req, res, next)=>{
   try{
+    req.session.user_id = req.user.user_id;
     res.status(200).json({
       message: `Hoşgeldin ${req.user.username}!`
     })
@@ -93,4 +95,32 @@ router.post("/login",usernameVarmi,sifreLoginCheck, async(req, res, next)=>{
   }
 });
 
+
+router.get("/logout", (req, res, next) => {
+  try {
+    if(req.session.user_id){
+      req.session.destroy(err => {
+        if(err){
+          next({
+            message:"Logout Hata"
+          });
+        }
+        else{
+          next({
+            status:200,
+            message: "çıkış yapildi"
+          });
+        }
+      })
+    }
+    else{
+      next({
+        status:200,
+        message:"oturum bulunamadı no session"
+      });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
 module.exports = router;

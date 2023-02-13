@@ -22,23 +22,38 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 
-const authRouter = require("./auth/auth-router");
-server.use('/api/auth', authRouter);
-const session = require('express-session');
+const session = require("express-session");
+const Store = require("connect-session-knex")(session);
 
-server.use(
-  session({
-    name: 'cikolatacips',
-    secret: 'TopSecret',
-    cookie: {
-      maxAge: 1 * 24 * 60 * 60 * 1000,
-      secure: true, 
-    },
-    httpOnly: true,
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+server.use(session({
+  name: "cikolatacips",
+  secret: "gizli_cikilotacips",
+  cookie: {
+    maxAge: 1000*60*60,
+    secure:false,
+    httpOnly:false
+  },
+  store : new Store({
+    knex: require("../data/db-config"),
+    tablename: "sessions",
+    sidfieldname: "sid",
+    createtable: true,
+    clearInterval: 1000*60*60,
+    disabledDbCleanup: false
+  }),
+  resave:false,
+  saveUninitialized:false
+}));
+
+
+const authRouter = require("./auth/auth-router");
+const usersRouter = require("./users/users-router");
+server.use("/api/auth", authRouter);
+server.use("/api/users",usersRouter);
+
+
+
+
 server.get("/", async(req, res) => {
   const users = await bul();
   res.status(200).json(users);
@@ -50,5 +65,12 @@ server.use((err, req, res, next) => { // eslint-disable-line
     stack: err.stack,
   });
 });
+
+server.use("*",(req,res)=>{
+  res.status(404).json({
+    message:"Opps Not found"
+  })
+});
+
 
 module.exports = server;

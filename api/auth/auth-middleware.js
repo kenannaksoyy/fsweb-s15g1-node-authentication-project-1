@@ -7,8 +7,21 @@ const { bul, usernameGoreBul } = require("../users/users-model");
     "mesaj": "Geçemezsiniz!"
   }
 */
-function sinirli() {
-
+function sinirli(req, res, next) {
+  try {
+    if(req.session.user_id){
+      next();
+    }
+    else{
+      next({
+        status:401,
+        message:"Geçemezsiniz!"
+      })
+    }
+  } 
+  catch (err) {
+    next(err);
+  }
 }
 
 /*
@@ -111,4 +124,4 @@ async function sifreLoginCheck(req, res, next ){
 }
 
 // Diğer modüllerde kullanılabilmesi için fonksiyonları "exports" nesnesine eklemeyi unutmayın.
-module.exports = {sifreGecerlimi,usernameVarmi,usernameBostami,sifreLoginCheck}
+module.exports = {sifreGecerlimi,usernameVarmi,usernameBostami,sifreLoginCheck,sinirli}

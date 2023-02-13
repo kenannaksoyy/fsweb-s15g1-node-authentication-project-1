@@ -10,14 +10,18 @@ async function bul() {
       username:u.username
     });
   });
+  /*
+  db("...").select("...","...")
+  */
   return resUsers;
 }
 
 /**
   verilen filtreye sahip tüm kullanıcıları içeren bir DİZİ ye çözümlenir
  */
-function goreBul(filtre) {
-
+async function goreBul(filtre) {
+  return await db('users')
+  .where(filtre)
 }
 
 /**
@@ -44,4 +48,4 @@ function ekle(user) {
 }
 
 // Diğer modüllerde kullanılabilmesi için fonksiyonları "exports" nesnesine eklemeyi unutmayın.
-module.exports={bul,ekle,idyeGoreBul,usernameGoreBul}
+module.exports={bul,ekle,idyeGoreBul,goreBul,usernameGoreBul}
